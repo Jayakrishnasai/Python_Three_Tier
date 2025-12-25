@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: python_backend
     ports:
-      - "8000:8000"
+      - "8080:8000" # Explicitly exposing backend at port 8080
     env_file:
       - ./backend/.env
     restart: always
@@ -24,7 +24,7 @@ services:
       dockerfile: Dockerfile
     container_name: react_frontend
     ports:
-      - "80:80"
+      - "80:80" # Frontend stays on port 80
     depends_on:
       backend:
         condition: service_healthy
