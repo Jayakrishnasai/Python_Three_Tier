@@ -9,11 +9,12 @@ services:
     env_file:
       - ./backend/.env
     restart: always
+    tty: true
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8000/" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - app-network
 
@@ -26,8 +27,9 @@ services:
       - "80:80"
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
     restart: always
+    tty: true
     networks:
       - app-network
 
