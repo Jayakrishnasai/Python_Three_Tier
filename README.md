@@ -35,6 +35,14 @@ This repository contains a modern implementation of a **Three-Tier Architecture*
 
 ## 🚀 How to Run
 
+### Docker (Recommended)
+You can run the entire stack using Docker:
+```bash
+docker compose up --build
+```
+
+### Manual Setup
+
 ### Prerequisites
 - Python 3.9+
 - Node.js & npm
