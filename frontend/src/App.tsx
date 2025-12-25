@@ -24,7 +24,7 @@ interface Task {
   created_at: string;
 }
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = '/api';
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
