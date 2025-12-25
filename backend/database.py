@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
@@ -13,23 +13,19 @@ logger = logging.getLogger(__name__)
 class DatabaseTier:
     """
     Data Access Layer (DAL) for Supabase.
-    Isolates database logic from API routes for better testability and maintainability.
+    Updated to handle Multi-User Isolation (user_id).
     """
     def __init__(self, client: Client):
         self.client = client
 
     @classmethod
     def create(cls) -> "DatabaseTier":
-        """
-        Factory method to create a DatabaseTier instance.
-        Ensures credentials exist before trying to connect.
-        """
         url = os.getenv("SUPABASE_URL")
         key = os.getenv("SUPABASE_KEY")
 
         if not url or not key:
-            logger.error("Supabase credentials missing in environment variables.")
-            raise RuntimeError("CRITICAL: Supabase URL or Key missing.")
+            logger.error("Supabase credentials missing.")
+            raise RuntimeError("Supabase URL or Key missing.")
 
         try:
             client = create_client(url, key)
@@ -39,44 +35,52 @@ class DatabaseTier:
             raise
 
     def is_working(self) -> bool:
-        """Check if the client is initialized."""
         return self.client is not None
 
-    def get_tasks(self):
+    def get_tasks(self, user_id: str):
+        """Fetch tasks only for a specific user to ensure data isolation."""
         try:
             return self.client.table("tasks") \
                 .select("*") \
+                .eq("user_id", user_id) \
                 .order("created_at") \
                 .execute()
         except Exception as e:
-            logger.error(f"Error fetching tasks: {str(e)}")
+            logger.error(f"Error fetching tasks for user {user_id}: {str(e)}")
             raise
 
-    def add_task(self, task_data: dict):
+    def add_task(self, user_id: str, task_data: dict):
+        """Insert task and explicitly tie it to the user."""
         try:
+            # Enforce user_id ownership
+            task_data["user_id"] = user_id
             return self.client.table("tasks") \
                 .insert(task_data) \
                 .execute()
         except Exception as e:
-            logger.error(f"Error adding task: {str(e)}")
+            logger.error(f"Error adding task for user {user_id}: {str(e)}")
             raise
 
-    def update_task(self, task_id: str, task_data: dict):
+    def update_task(self, user_id: str, task_id: str, task_data: dict):
+        """Update task ensuring the user owns it."""
         try:
             return self.client.table("tasks") \
                 .update(task_data) \
                 .eq("id", task_id) \
+                .eq("user_id", user_id) \
                 .execute()
         except Exception as e:
-            logger.error(f"Error updating task {task_id}: {str(e)}")
+            logger.error(f"Error updating task {task_id} for user {user_id}: {str(e)}")
             raise
 
-    def delete_task(self, task_id: str):
+    def delete_task(self, user_id: str, task_id: str):
+        """Delete task ensuring the user owns it."""
         try:
             return self.client.table("tasks") \
                 .delete() \
                 .eq("id", task_id) \
+                .eq("user_id", user_id) \
                 .execute()
         except Exception as e:
-            logger.error(f"Error deleting task {task_id}: {str(e)}")
+            logger.error(f"Error deleting task {task_id} for user {user_id}: {str(e)}")
             raise

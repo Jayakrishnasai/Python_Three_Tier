@@ -23,13 +23,13 @@ def init_db():
         with open(schema_path, 'r') as f:
             schema_sql = f.read()
         
-        print("📝 Executing schema.sql...")
+        print("📝 Executing Production Schema (public.tasks, RLS, user_id)...")
         cur.execute(schema_sql)
         
         # Commit the changes
         conn.commit()
         
-        print("✅ Database initialized successfully!")
+        print("✅ Database initialized successfully with production constraints!")
         
         # Close connections
         cur.close()
