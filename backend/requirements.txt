@@ -4,3 +4,4 @@ supabase
 python-dotenv
 pydantic
 gunicorn
+psycopg2-binary
